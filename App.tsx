@@ -58,26 +58,26 @@ const compressImage = (base64Str: string, maxWidth = 512, quality = 0.7): Promis
 };
 
 // --- Icons ---
-const PlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>;
-const ChatIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2-2z"/></svg>;
-const UsersIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
-const SettingsIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>;
-const TrashIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>;
-const CameraIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>;
-const VideoIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>;
-const CheckIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>;
-const ArrowLeftIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>;
-const GalleryIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>;
-const SaveIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>;
-const DownloadIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>;
+const PlusIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M5 12h14"/><path d="M12 5v14"/></svg>;
+const ChatIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2-2z"/></svg>;
+const UsersIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
+const EditIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>;
+const TrashIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>;
+const CameraIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>;
+const VideoIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>;
+const CheckIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="20 6 9 17 4 12"/></svg>;
+const ArrowLeftIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="m15 18-6-6 6-6"/></svg>;
+const GalleryIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>;
+const SaveIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>;
+const DownloadIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>;
 const ImageIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>;
-const SpeakerIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>;
-const MicIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>;
-const StopIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" /></svg>;
-const CoinIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>;
-const PaperclipIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>;
-const CloseIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>;
-const ScaleIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v18"/><path d="M6 18h12"/><path d="M6 8h12"/></svg>;
+const SpeakerIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>;
+const MicIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>;
+const StopIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><rect x="4" y="4" width="16" height="16" rx="2" /></svg>;
+const CoinIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>;
+const PaperclipIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>;
+const CloseIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" {...props}><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>;
+const ScaleIcon = (props: React.SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M12 3v18"/><path d="M6 18h12"/><path d="M6 8h12"/></svg>;
 
 // --- Helper Components ---
 
@@ -249,17 +249,21 @@ const MessageBubble: React.FC<{
 
 // --- Missing Components Implementation ---
 
-const CreateCharacter: React.FC<{ onSave: (c: Character) => void; onCancel: () => void }> = ({ onSave, onCancel }) => {
-    const [name, setName] = useState('');
-    const [description, setDescription] = useState('');
-    const [bio, setBio] = useState('');
+const CreateCharacter: React.FC<{ 
+    onSave: (c: Character) => void; 
+    onCancel: () => void; 
+    initialData?: Character 
+}> = ({ onSave, onCancel, initialData }) => {
+    const [name, setName] = useState(initialData?.name || '');
+    const [description, setDescription] = useState(initialData?.description || '');
+    const [bio, setBio] = useState(initialData?.bio || '');
     const [avatarPrompt, setAvatarPrompt] = useState('');
-    const [avatar, setAvatar] = useState('');
-    const [height, setHeight] = useState<number>(1700); // Default height 170cm
-    const [voice, setVoice] = useState('Kore');
-    const [voiceSpeed, setVoiceSpeed] = useState(1.0);
-    const [voicePitch, setVoicePitch] = useState(0);
-    const [color, setColor] = useState('#8B5CF6'); // Violet default
+    const [avatar, setAvatar] = useState(initialData?.avatar || '');
+    const [height, setHeight] = useState<number>(initialData?.height || 1700);
+    const [voice, setVoice] = useState(initialData?.voice || 'Kore');
+    const [voiceSpeed, setVoiceSpeed] = useState(initialData?.voiceSpeed || 1.0);
+    const [voicePitch, setVoicePitch] = useState(initialData?.voicePitch || 0);
+    const [color, setColor] = useState(initialData?.color || '#8B5CF6'); 
     const [isGenerating, setIsGenerating] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -269,8 +273,7 @@ const CreateCharacter: React.FC<{ onSave: (c: Character) => void; onCancel: () =
             const reader = new FileReader();
             reader.onloadend = async () => {
                 const base64 = reader.result as string;
-                // Compress before setting state to avoid storage quota issues later
-                const compressed = await compressImage(base64, 400); // 400px is enough for avatar
+                const compressed = await compressImage(base64, 400); 
                 setAvatar(compressed);
             };
             reader.readAsDataURL(file);
@@ -283,7 +286,6 @@ const CreateCharacter: React.FC<{ onSave: (c: Character) => void; onCancel: () =
       try {
         const prompt = avatarPrompt || `Portrait of ${name}, ${description}`;
         const url = await generateImage(prompt);
-        // Gemini returns optimize base64, but let's ensure it's small enough
         const compressed = await compressImage(url, 400);
         setAvatar(compressed);
       } catch (e) {
@@ -297,7 +299,7 @@ const CreateCharacter: React.FC<{ onSave: (c: Character) => void; onCancel: () =
     const handleSave = () => {
       if (!name || !description || !avatar) return;
       const newChar: Character = {
-        id: generateId(),
+        id: initialData?.id || generateId(),
         name,
         description,
         bio,
@@ -307,14 +309,15 @@ const CreateCharacter: React.FC<{ onSave: (c: Character) => void; onCancel: () =
         voiceSpeed,
         voicePitch,
         color,
-        created_at: Date.now()
+        created_at: initialData?.created_at || Date.now(),
+        evolutionContext: initialData?.evolutionContext
       };
       onSave(newChar);
     };
   
     return (
       <div className="max-w-2xl mx-auto p-6 bg-gray-900 rounded-2xl border border-gray-800 shadow-2xl">
-        <h2 className="text-2xl font-bold mb-6 text-white">Создание персонажа</h2>
+        <h2 className="text-2xl font-bold mb-6 text-white">{initialData ? 'Редактировать персонажа' : 'Создание персонажа'}</h2>
         
         <div className="space-y-6">
           {/* Avatar Section */}
@@ -486,7 +489,9 @@ const CreateCharacter: React.FC<{ onSave: (c: Character) => void; onCancel: () =
   
           <div className="flex gap-4 pt-4 border-t border-gray-800">
              <Button onClick={onCancel} variant="ghost" className="flex-1">Отмена</Button>
-             <Button onClick={handleSave} disabled={!name || !description || !avatar} className="flex-1">Создать</Button>
+             <Button onClick={handleSave} disabled={!name || !description || !avatar} className="flex-1">
+                 {initialData ? 'Сохранить изменения' : 'Создать'}
+             </Button>
           </div>
         </div>
       </div>
@@ -784,6 +789,7 @@ const App = () => {
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [page, setPage] = useState<Page>(Page.HOME);
   const [selectedChars, setSelectedChars] = useState<string[]>([]);
+  const [editingCharacter, setEditingCharacter] = useState<Character | null>(null);
   
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [globalError, setGlobalError] = useState<string | null>(null);
@@ -905,9 +911,23 @@ const App = () => {
     }
   };
 
+  const handleEditCharacter = (e: React.MouseEvent, char: Character) => {
+      e.stopPropagation();
+      setEditingCharacter(char);
+      setPage(Page.CREATE);
+  };
+
   const handleSaveCharacter = async (c: Character) => {
-      const newChars = [c, ...characters];
+      // Check if updating existing or creating new
+      let newChars;
+      if (characters.some(char => char.id === c.id)) {
+          newChars = characters.map(char => char.id === c.id ? c : char);
+      } else {
+          newChars = [c, ...characters];
+      }
+      
       setCharacters(newChars);
+      setEditingCharacter(null); // Reset editing state
       setPage(Page.HOME);
       await triggerSave('ai_rpg_chars', newChars);
   };
@@ -1224,7 +1244,7 @@ const App = () => {
                   </div>
                   <div className="flex gap-3">
                     <Button onClick={() => setPage(Page.GALLERY)} variant="secondary"><GalleryIcon /> Галерея</Button>
-                    <Button onClick={() => setPage(Page.CREATE)}><PlusIcon /> Создать Персонажа</Button>
+                    <Button onClick={() => { setEditingCharacter(null); setPage(Page.CREATE); }}><PlusIcon /> Создать Персонажа</Button>
                   </div>
               </header>
 
@@ -1238,7 +1258,7 @@ const App = () => {
                       {characters.length === 0 ? (
                           <div className="bg-gray-900/50 border-2 border-dashed border-gray-800 rounded-xl p-12 text-center">
                               <p className="text-gray-500 mb-4">Список персонажей пуст</p>
-                              <Button variant="secondary" onClick={() => setPage(Page.CREATE)}>Создать первого</Button>
+                              <Button variant="secondary" onClick={() => { setEditingCharacter(null); setPage(Page.CREATE); }}>Создать первого</Button>
                           </div>
                       ) : (
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-20">
@@ -1256,8 +1276,15 @@ const App = () => {
                                               <p className="text-sm text-gray-400 line-clamp-2 leading-snug">{char.description}</p>
                                           </div>
                                           <div className="flex gap-2 self-start mt-2 z-10">
-                                            <button onClick={(e) => handleStartDirectChat(char.id, e)} className="text-xs font-bold text-gray-500 hover:text-white uppercase tracking-wide px-2 py-1 bg-gray-800 rounded hover:bg-gray-700 transition-colors">Написать лично</button>
-                                            <button onClick={(e) => handleDeleteCharacter(e, char.id)} className="text-gray-500 hover:text-red-500 p-1 bg-gray-800 rounded hover:bg-gray-700 transition-colors" title="Удалить персонажа"><TrashIcon /></button>
+                                            <button onClick={(e) => handleStartDirectChat(char.id, e)} className="text-xs font-bold text-gray-500 hover:text-white uppercase tracking-wide px-2 py-1 bg-gray-800 rounded hover:bg-gray-700 transition-colors" title="Написать">
+                                                <ChatIcon />
+                                            </button>
+                                            <button onClick={(e) => handleEditCharacter(e, char)} className="text-gray-500 hover:text-blue-400 p-1 bg-gray-800 rounded hover:bg-gray-700 transition-colors" title="Редактировать">
+                                                <EditIcon />
+                                            </button>
+                                            <button onClick={(e) => handleDeleteCharacter(e, char.id)} className="text-gray-500 hover:text-red-500 p-1 bg-gray-800 rounded hover:bg-gray-700 transition-colors" title="Удалить">
+                                                <TrashIcon />
+                                            </button>
                                           </div>
                                       </div>
                                   </div>
@@ -1270,7 +1297,7 @@ const App = () => {
                       <h2 className="text-2xl font-bold flex items-center gap-2"><ChatIcon /> Чаты</h2>
                       <div className="space-y-3">
                           {chats.length === 0 && <p className="text-gray-500 italic">Нет активных чатов</p>}
-                          {chats.map(chat => (
+                          {[...chats].sort((a, b) => b.lastUpdated - a.lastUpdated).map(chat => (
                               <div key={chat.id} onClick={() => { setActiveChatId(chat.id); setPage(Page.CHAT); }} className="bg-gray-900 hover:bg-gray-800 p-3 rounded-xl cursor-pointer flex items-center gap-3 group relative transition-colors">
                                   <div className="w-12 h-12 rounded-full bg-gray-800 overflow-hidden shrink-0 grid place-items-center">
                                       {chat.participants.length > 1 ? (
@@ -1292,6 +1319,9 @@ const App = () => {
                                       <p className="text-xs text-gray-500 truncate">
                                           {chat.messages.length > 0 ? chat.messages[chat.messages.length-1].content : 'Пусто'}
                                       </p>
+                                      <p className="text-[10px] text-gray-600">
+                                          {new Date(chat.lastUpdated).toLocaleDateString()} {new Date(chat.lastUpdated).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                      </p>
                                   </div>
                                   <button onClick={(e) => deleteChat(e, chat.id)} className="p-2 text-gray-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"><TrashIcon /></button>
                               </div>
@@ -1307,7 +1337,12 @@ const App = () => {
 
       {page === Page.CREATE && (
           <div className="pt-10 pb-10 h-screen overflow-y-auto custom-scrollbar">
-              <CreateCharacter onSave={handleSaveCharacter} onCancel={() => setPage(Page.HOME)} />
+              <CreateCharacter 
+                key={editingCharacter ? editingCharacter.id : 'new'} 
+                onSave={handleSaveCharacter} 
+                onCancel={() => { setEditingCharacter(null); setPage(Page.HOME); }} 
+                initialData={editingCharacter || undefined}
+              />
           </div>
       )}
 
