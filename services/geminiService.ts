@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, HarmCategory, HarmBlockThreshold, Modality } from "@google/genai";
 
 const getClient = () => {
@@ -128,7 +129,8 @@ export const generateImage = async (prompt: string, referenceAvatars: string[] =
     VISUAL RULES:
     1. STYLE: Cinematic, high resolution, consistent with the provided character references (if any).
     2. CHARACTERS: Ensure characters physically resemble the provided reference images.
-    3. COMPOSITION: Artistic and focused on the described action or scene.
+    3. SCALE & RATIO: **CRITICAL** Respect the relative heights of characters if specified (mm). Tall characters must look taller than short ones. 
+    4. COMPOSITION: Artistic and focused on the described action or scene.
     `;
 
     parts.push({ text: enhancedPrompt });
@@ -200,8 +202,9 @@ export const generateBackground = async (plotSummary: string, referenceAvatars: 
     CRITICAL VISUAL RULES:
     1. PERSPECTIVE: **FIRST-PERSON POV (Point of View)**. The camera IS the user's eyes. Do NOT show the user/observer in the shot.
     2. CHARACTERS: If characters are described in the scene, they must physically resemble the reference images provided.
-    3. STYLE: 8k resolution, highly detailed, atmospheric lighting, movie still quality.
-    4. COMPOSITION: Wide shot (16:9).
+    3. SCALE: Respect the defined heights of characters relative to the environment (doors, furniture) and each other.
+    4. STYLE: 8k resolution, highly detailed, atmospheric lighting, movie still quality.
+    5. COMPOSITION: Wide shot (16:9).
     `;
 
     parts.push({ text: prompt });
@@ -304,7 +307,7 @@ export const getPlotSummary = async (
         
         // Include character visual descriptions in the context analysis
         const charContext = characterDescriptions.length > 0 
-            ? `Внешность персонажей:\n${characterDescriptions.join('\n')}` 
+            ? `Описания персонажей (включая рост):\n${characterDescriptions.join('\n')}` 
             : "";
 
         const prompt = `Проанализируй последние 15 сообщений чата и опиши визуальную сцену ДЛЯ ГЕНЕРАЦИИ ИЗОБРАЖЕНИЯ.
@@ -316,9 +319,10 @@ export const getPlotSummary = async (
         
         Требования к описанию:
         1. Опиши окружение, освещение, атмосферу.
-        2. Опиши, где находятся персонажи и что они делают, основываясь на их внешности.
-        3. Опиши сцену так, как будто мы смотрим ГЛАЗАМИ ПОЛЬЗОВАТЕЛЯ (First Person View). Самого пользователя в кадре быть не должно, только то, что он видит (руки, собеседники, пейзаж).
-        4. Ответ дай ОДНИМ детальным предложением на английском языке.`;
+        2. Опиши, где находятся персонажи и что они делают.
+        3. **ВАЖНО**: Обязательно учитывай разницу в росте персонажей и их масштаб относительно окружения, если рост указан в мм.
+        4. Опиши сцену так, как будто мы смотрим ГЛАЗАМИ ПОЛЬЗОВАТЕЛЯ (First Person View). Самого пользователя в кадре быть не должно, только то, что он видит.
+        5. Ответ дай ОДНИМ детальным предложением на английском языке.`;
 
         const response = await ai.models.generateContent({
             model: 'gemini-3-flash-preview',
@@ -382,10 +386,12 @@ export const analyzeCharacterEvolution = async (
 export const streamCharacterResponse = async (
   characterName: string,
   characterPersona: string,
+  characterBio: string | undefined,
   evolutionContext: string | undefined,
   chatHistory: { sender: string; text: string }[],
   otherCharacters: string[],
   isNSFW: boolean,
+  latestUserImage: string | undefined,
   onChunk: (text: string) => void
 ) => {
   const ai = getClient();
@@ -399,6 +405,7 @@ export const streamCharacterResponse = async (
   const systemInstruction = `Ты ролевой ИИ по имени ${characterName}.
   
   ТВОЯ БАЗОВАЯ ЛИЧНОСТЬ: ${characterPersona}.
+  ${characterBio ? `ТВОЯ БИОГРАФИЯ: ${characterBio}.` : ""}
   
   ТВОЕ ТЕКУЩЕЕ МЕНТАЛЬНОЕ СОСТОЯНИЕ И ПАМЯТЬ: ${evolutionContext || "Специфических воспоминаний пока нет."}
   
@@ -441,15 +448,37 @@ export const streamCharacterResponse = async (
   });
 
   // Pass history as part of the prompt
-  const prompt = `ИСТОРИЯ ЧАТА:
+  const promptText = `ИСТОРИЯ ЧАТА:
 ${contextScript}
+
+(Если пользователь прикрепил изображение, опиши его или отреагируй на него в контексте роли).
 
 Продолжи диалог от имени ${characterName}. Ответь на последнее сообщение или прокомментируй ситуацию.
 Если нечего сказать, ответь [SILENCE].`;
 
+  const parts: any[] = [{ text: promptText }];
+  
+  // Add image if present
+  if (latestUserImage) {
+      // Remove header if present (data:image/jpeg;base64,)
+      const base64Data = latestUserImage.split(',')[1];
+      const mimeType = latestUserImage.split(';')[0].split(':')[1] || 'image/jpeg';
+      
+      parts.push({ 
+          inlineData: {
+              mimeType: mimeType,
+              data: base64Data
+          }
+      });
+  }
+
   let result;
   try {
-    result = await chat.sendMessageStream({ message: prompt });
+    result = await chat.sendMessageStream({ 
+        message: {
+            parts: parts
+        }
+    });
   } catch (e) {
     handleGeminiError(e);
     return ""; // Unreachable if error thrown, keeps TS happy

@@ -3,8 +3,12 @@ export interface Character {
   id: string;
   name: string;
   description: string;
+  bio?: string; // Detailed backstory
   avatar: string; // Base64 or URL
+  height?: number; // Height in mm
   voice?: string;
+  voicePitch?: number; // Detune in cents (-1200 to 1200)
+  voiceSpeed?: number; // Playback rate (0.5 to 2.0)
   color: string; // Bubble color
   created_at: number;
   evolutionContext?: string; // Stores learned memories and personality shifts

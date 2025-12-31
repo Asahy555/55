@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Character, ChatSession, Message, Page, GalleryItem } from './types';
 import { Button } from './components/Button';
@@ -74,6 +75,9 @@ const SpeakerIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" hei
 const MicIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>;
 const StopIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" /></svg>;
 const CoinIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>;
+const PaperclipIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>;
+const CloseIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>;
+const ScaleIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v18"/><path d="M6 18h12"/><path d="M6 8h12"/></svg>;
 
 // --- Helper Components ---
 
@@ -99,6 +103,16 @@ const MessageBubble: React.FC<{
             const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
             const source = ctx.createBufferSource();
             source.buffer = audioBuffer;
+            
+            // Apply Voice Settings
+            if (char.voiceSpeed) {
+                source.playbackRate.value = char.voiceSpeed;
+            }
+            if (char.voicePitch) {
+                // detune is in cents. 100 cents = 1 semitone.
+                source.detune.value = char.voicePitch;
+            }
+
             source.connect(ctx.destination);
             source.start();
             setAudioStatus('playing');
@@ -238,9 +252,13 @@ const MessageBubble: React.FC<{
 const CreateCharacter: React.FC<{ onSave: (c: Character) => void; onCancel: () => void }> = ({ onSave, onCancel }) => {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
+    const [bio, setBio] = useState('');
     const [avatarPrompt, setAvatarPrompt] = useState('');
     const [avatar, setAvatar] = useState('');
+    const [height, setHeight] = useState<number>(1700); // Default height 170cm
     const [voice, setVoice] = useState('Kore');
+    const [voiceSpeed, setVoiceSpeed] = useState(1.0);
+    const [voicePitch, setVoicePitch] = useState(0);
     const [color, setColor] = useState('#8B5CF6'); // Violet default
     const [isGenerating, setIsGenerating] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -282,8 +300,12 @@ const CreateCharacter: React.FC<{ onSave: (c: Character) => void; onCancel: () =
         id: generateId(),
         name,
         description,
+        bio,
         avatar,
+        height,
         voice,
+        voiceSpeed,
+        voicePitch,
         color,
         created_at: Date.now()
       };
@@ -366,28 +388,100 @@ const CreateCharacter: React.FC<{ onSave: (c: Character) => void; onCancel: () =
                 />
              </div>
           </div>
-  
+
           <div>
-             <label className="block text-sm font-medium text-gray-400 mb-1">Личность (Системный промпт)</label>
-             <textarea 
-                value={description}
-                onChange={e => setDescription(e.target.value)}
-                className="w-full h-32 bg-gray-800 border-gray-700 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-accent-500 outline-none resize-none"
-                placeholder="Опиши характер, манеру речи, предысторию..."
-             />
+             <label className="block text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
+                 <ScaleIcon /> Рост (мм)
+             </label>
+             <div className="flex items-center gap-4 bg-gray-800/50 p-3 rounded-xl border border-gray-700">
+                 <input 
+                    type="range"
+                    min="500"
+                    max="2500"
+                    step="10"
+                    value={height}
+                    onChange={e => setHeight(parseInt(e.target.value))}
+                    className="flex-1 accent-accent-500 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+                 />
+                 <div className="flex items-center gap-2 bg-gray-900 rounded-lg px-3 py-1 border border-gray-700">
+                     <input 
+                        type="number"
+                        value={height}
+                        onChange={e => setHeight(parseInt(e.target.value))}
+                        className="w-16 bg-transparent text-white text-right outline-none font-mono"
+                     />
+                     <span className="text-gray-500 text-sm font-bold">mm</span>
+                 </div>
+             </div>
           </div>
   
-          <div>
-             <label className="block text-sm font-medium text-gray-400 mb-1">Голос (TTS)</label>
-             <select 
-               value={voice}
-               onChange={e => setVoice(e.target.value)}
-               className="w-full bg-gray-800 border-gray-700 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-accent-500 outline-none"
-             >
-               {['Kore', 'Puck', 'Charon', 'Fenrir', 'Zephyr'].map(v => (
-                 <option key={v} value={v}>{v}</option>
-               ))}
-             </select>
+          <div className="grid grid-cols-1 gap-4">
+            <div>
+               <label className="block text-sm font-medium text-gray-400 mb-1">Личность (Системный промпт)</label>
+               <textarea 
+                  value={description}
+                  onChange={e => setDescription(e.target.value)}
+                  className="w-full h-24 bg-gray-800 border-gray-700 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-accent-500 outline-none resize-none"
+                  placeholder="Опиши характер, манеру речи..."
+               />
+            </div>
+            <div>
+               <label className="block text-sm font-medium text-gray-400 mb-1">Биография (История)</label>
+               <textarea 
+                  value={bio}
+                  onChange={e => setBio(e.target.value)}
+                  className="w-full h-32 bg-gray-800 border-gray-700 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-accent-500 outline-none resize-none"
+                  placeholder="Подробная история жизни, важные события, тайны..."
+               />
+            </div>
+          </div>
+  
+          <div className="bg-gray-800/50 p-4 rounded-xl border border-gray-800 space-y-4">
+             <h3 className="text-sm font-bold text-gray-300 flex items-center gap-2"><SpeakerIcon /> Настройки Голоса (TTS)</h3>
+             
+             <div>
+                 <label className="block text-xs font-medium text-gray-400 mb-1">Голос</label>
+                 <select 
+                   value={voice}
+                   onChange={e => setVoice(e.target.value)}
+                   className="w-full bg-gray-800 border-gray-700 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-accent-500 outline-none"
+                 >
+                   {['Kore', 'Puck', 'Charon', 'Fenrir', 'Zephyr'].map(v => (
+                     <option key={v} value={v}>{v}</option>
+                   ))}
+                 </select>
+             </div>
+
+             <div className="grid grid-cols-2 gap-4">
+                 <div>
+                    <label className="block text-xs font-medium text-gray-400 mb-1">Скорость: {voiceSpeed}x</label>
+                    <input 
+                        type="range"
+                        min="0.5"
+                        max="2.0"
+                        step="0.1"
+                        value={voiceSpeed}
+                        onChange={e => setVoiceSpeed(parseFloat(e.target.value))}
+                        className="w-full accent-accent-500"
+                    />
+                 </div>
+                 <div>
+                    <label className="block text-xs font-medium text-gray-400 mb-1">Тон (Pitch): {voicePitch}</label>
+                    <input 
+                        type="range"
+                        min="-1200"
+                        max="1200"
+                        step="100"
+                        value={voicePitch}
+                        onChange={e => setVoicePitch(parseInt(e.target.value))}
+                        className="w-full accent-accent-500"
+                    />
+                    <div className="flex justify-between text-[10px] text-gray-600 px-1">
+                        <span>Low</span>
+                        <span>High</span>
+                    </div>
+                 </div>
+             </div>
           </div>
   
           <div className="flex gap-4 pt-4 border-t border-gray-800">
@@ -494,15 +588,17 @@ const ChatInterface = ({
     onOpenDirectChat: (id: string) => void,
     onSaveToGallery: (url: string, type: 'image' | 'video' | 'background', caption: string) => void,
     setGlobalError: (msg: string | null) => void,
-    sendMessageToAI: (text: string) => void,
+    sendMessageToAI: (text: string, image?: string) => void,
     onGenerateMedia: (type: 'photo' | 'video') => void
   }) => {
     const [input, setInput] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
     const [isRecording, setIsRecording] = useState(false);
+    const [attachment, setAttachment] = useState<string | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const sessionRef = useRef(session);
     const recognitionRef = useRef<any>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
   
     useEffect(() => { sessionRef.current = session; }, [session]);
   
@@ -556,11 +652,29 @@ const ChatInterface = ({
       recognitionRef.current = recognition;
       recognition.start();
     };
+
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = async () => {
+                const base64 = reader.result as string;
+                const compressed = await compressImage(base64, 800);
+                setAttachment(compressed);
+            };
+            reader.readAsDataURL(file);
+        }
+        // Reset input so same file can be selected again
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+
+    const clearAttachment = () => setAttachment(null);
   
     const handleSend = () => {
-        if (!input.trim()) return;
-        sendMessageToAI(input);
+        if (!input.trim() && !attachment) return;
+        sendMessageToAI(input, attachment || undefined);
         setInput('');
+        setAttachment(null);
     };
   
     const handleProfitAsk = () => { sendMessageToAI("Tell me about profit! 💰"); };
@@ -604,8 +718,33 @@ const ChatInterface = ({
         </div>
   
         <div className="relative z-20 p-4 bg-gray-900/90 border-t border-gray-800 shrink-0">
+          {/* Attachment Preview */}
+          {attachment && (
+              <div className="max-w-4xl mx-auto mb-2 flex items-start">
+                  <div className="relative group">
+                      <img src={attachment} alt="Preview" className="h-20 w-auto rounded-lg border border-gray-600 object-cover" />
+                      <button 
+                        onClick={clearAttachment}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 shadow-md"
+                      >
+                          <CloseIcon />
+                      </button>
+                  </div>
+              </div>
+          )}
+
           <div className="flex gap-2 max-w-4xl mx-auto items-end">
             <div className="flex gap-1 pb-1">
+               <input 
+                   type="file" 
+                   ref={fileInputRef} 
+                   onChange={handleFileSelect} 
+                   accept="image/*" 
+                   className="hidden" 
+               />
+               <Button variant="ghost" className="!p-2 text-gray-400 hover:text-accent-500" onClick={() => fileInputRef.current?.click()} title="Прикрепить фото">
+                   <PaperclipIcon />
+               </Button>
                <Button variant="ghost" className="!p-2 text-gray-400 hover:text-accent-500" onClick={() => onGenerateMedia('photo')} title="Фото">
                    <CameraIcon />
                </Button>
@@ -629,7 +768,7 @@ const ChatInterface = ({
                   {isRecording ? <StopIcon /> : <MicIcon />}
               </button>
             </div>
-            <Button onClick={handleSend} disabled={!input.trim()} className="rounded-xl px-6 h-[50px]">
+            <Button onClick={handleSend} disabled={!input.trim() && !attachment} className="rounded-xl px-6 h-[50px]">
                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
             </Button>
           </div>
@@ -754,6 +893,18 @@ const App = () => {
       }
   };
 
+  const handleDeleteCharacter = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    if (window.confirm("Вы уверены, что хотите удалить этого персонажа? Все его данные будут утеряны.")) {
+        const newChars = characters.filter(c => c.id !== id);
+        setCharacters(newChars);
+        setSelectedChars(prev => prev.filter(c => c !== id));
+        // Also verify if we should clean up chats, currently we keep history but char data will be missing in new renders
+        // It's safer to keep chats history for now.
+        await triggerSave('ai_rpg_chars', newChars);
+    }
+  };
+
   const handleSaveCharacter = async (c: Character) => {
       const newChars = [c, ...characters];
       setCharacters(newChars);
@@ -844,9 +995,14 @@ const App = () => {
 
       try {
           const activeCharacters = characters.filter(c => session.participants.includes(c.id));
+          // Pass formatted character descriptions including height
+          const charDescriptions = activeCharacters.map(c => 
+              `Имя: ${c.name}, Рост: ${c.height || 1700}мм, Внешность: ${c.description}`
+          );
+
           const plot = await getPlotSummary(
               session.messages.map(m => ({ sender: m.senderName, text: m.content })),
-              activeCharacters.map(c => c.description)
+              charDescriptions
           );
           
           updateLoadingMessage(type === 'photo' ? "🎨 Рисую сцену (Генерирую)..." : "🎬 Монтирую видео (Генерирую)...");
@@ -906,7 +1062,7 @@ const App = () => {
       }
   };
 
-  const sendMessage = async (text: string) => {
+  const sendMessage = async (text: string, image?: string) => {
     if (!activeChatId) return;
     const chatIndex = chats.findIndex(c => c.id === activeChatId);
     if (chatIndex === -1) return;
@@ -917,6 +1073,7 @@ const App = () => {
         senderId: 'user',
         senderName: 'Вы',
         content: text,
+        imageUrl: image, // Store user image
         timestamp: Date.now()
     };
     
@@ -950,13 +1107,19 @@ const App = () => {
 
         try {
              const otherCharNames = participants.filter(p => p.id !== char.id).map(p => p.name);
+             
+             // Inject height into bio for context
+             const fullBio = `Рост: ${char.height || 1700}мм. ${char.bio || ''}`;
+
              const fullResponseText = await streamCharacterResponse(
                 char.name,
                 char.description,
+                fullBio,
                 char.evolutionContext,
                 contextMessages.map(m => ({ sender: m.senderId === 'user' ? 'user' : m.senderName, text: m.content })),
                 otherCharNames,
                 currentChat.isNSFW || false,
+                image, // Pass the image to the model context
                 (chunk) => {
                     setChats(prevChats => {
                         const newC = [...prevChats];
@@ -1092,7 +1255,10 @@ const App = () => {
                                               <h3 className="font-bold text-lg truncate pr-8" style={{color: char.color}}>{char.name}</h3>
                                               <p className="text-sm text-gray-400 line-clamp-2 leading-snug">{char.description}</p>
                                           </div>
-                                          <button onClick={(e) => handleStartDirectChat(char.id, e)} className="text-xs font-bold text-gray-500 hover:text-white self-start mt-2 uppercase tracking-wide px-2 py-1 bg-gray-800 rounded hover:bg-gray-700 transition-colors z-10">Написать лично</button>
+                                          <div className="flex gap-2 self-start mt-2 z-10">
+                                            <button onClick={(e) => handleStartDirectChat(char.id, e)} className="text-xs font-bold text-gray-500 hover:text-white uppercase tracking-wide px-2 py-1 bg-gray-800 rounded hover:bg-gray-700 transition-colors">Написать лично</button>
+                                            <button onClick={(e) => handleDeleteCharacter(e, char.id)} className="text-gray-500 hover:text-red-500 p-1 bg-gray-800 rounded hover:bg-gray-700 transition-colors" title="Удалить персонажа"><TrashIcon /></button>
+                                          </div>
                                       </div>
                                   </div>
                               )})}

@@ -22,6 +22,10 @@ const performIDB = async <T>(
       }
     };
 
+    request.onblocked = () => {
+       console.warn("IDB Blocked: Please close other tabs with this app open.");
+    };
+
     request.onsuccess = async () => {
       const db = request.result;
       try {
@@ -52,7 +56,10 @@ const performIDB = async <T>(
       }
     };
 
-    request.onerror = () => reject(request.error);
+    request.onerror = () => {
+        console.error("IDB Open Error:", request.error);
+        reject(request.error);
+    };
   });
 };
 
@@ -71,7 +78,6 @@ export const storage = {
       });
     } catch (e) {
       console.warn(`IDB Read Error (${key}):`, e);
-      // Fall through to LocalStorage check
     }
 
     if (idbResult !== undefined && idbResult !== null) {
@@ -98,11 +104,16 @@ export const storage = {
       console.error(`IDB Write Error (${key}):`, e);
     }
 
-    // 2. Write to LocalStorage (Backup for small data, fails gracefully on quota)
+    // 2. Write to LocalStorage (Backup for metadata/small data)
+    // We try-catch this because images might exceed LS quota, but we want IDB to succeed at least.
     try {
-      window.localStorage.setItem(key, JSON.stringify(value));
+      // Basic check to avoid choking LS with huge image strings
+      const str = JSON.stringify(value);
+      if (str.length < 5000000) { // 5MB limit check approx
+        window.localStorage.setItem(key, str);
+      }
     } catch (e) {
-      // Expected for large data (images)
+      // Expected for large data
     }
   },
 
