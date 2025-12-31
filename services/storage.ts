@@ -20,16 +20,15 @@ const localStore = {
       if (typeof window === 'undefined') return;
       window.localStorage.setItem(key, JSON.stringify(value));
     } catch (e) {
-      console.warn(`LS Write Error (${key}) - likely quota exceeded:`, e);
+      // Ignore quota errors silently, relying on IDB
+      console.warn(`LS Write Error (${key}) - Storage full?`, e);
     }
   },
   delete: (key: string) => {
     try {
       if (typeof window === 'undefined') return;
       window.localStorage.removeItem(key);
-    } catch (e) {
-      // ignore
-    }
+    } catch (e) { console.error(e); }
   }
 };
 
@@ -74,7 +73,7 @@ const getDB = (): Promise<IDBDatabase> => {
 // --- Hybrid Storage Export ---
 export const storage = {
   get: async <T>(key: string): Promise<T | null> => {
-    // 1. Try IndexedDB first (Primary Source)
+    // Strategy: Try IDB first. If missing, try LS (and migrate).
     try {
       const db = await getDB();
       const result = await new Promise<T | null>((resolve, reject) => {
@@ -90,33 +89,24 @@ export const storage = {
       console.warn(`IDB Read Failed (${key}):`, e);
     }
 
-    // 2. Fallback to LocalStorage (only if IDB empty/failed)
-    // ALLOW reading everything (including gallery) to recover old data
-    return localStore.get<T>(key);
+    // Fallback / Migration
+    const lsData = localStore.get<T>(key);
+    if (lsData) {
+        // If found in LS but not IDB, save to IDB for future
+        storage.set(key, lsData).catch(e => console.error("Migration failed", e));
+        return lsData;
+    }
+    
+    return null;
   },
 
   set: async (key: string, value: any): Promise<void> => {
-    // 1. Heavy items (Gallery) -> IndexedDB ONLY
-    if (key === 'ai_rpg_gallery') {
-       try {
-         const db = await getDB();
-         await new Promise<void>((resolve, reject) => {
-           const tx = db.transaction(STORE_NAME, 'readwrite');
-           const store = tx.objectStore(STORE_NAME);
-           const req = store.put(value, key);
-           req.onsuccess = () => resolve();
-           req.onerror = () => reject(req.error);
-         });
-       } catch (e) {
-         console.error("Critical: Failed to save Gallery to IDB", e);
-         throw e; // Propagate error for UI handling
-       }
-       return;
-    }
-
-    // 2. Light items (Chars, Chats) -> Both (LS as backup)
-    localStore.set(key, value); // Sync backup
+    // Strategy: Write to BOTH. IDB for capacity, LS for redundancy.
     
+    // 1. Write to LS (Best effort)
+    localStore.set(key, value);
+
+    // 2. Write to IDB (Critical)
     try {
       const db = await getDB();
       await new Promise<void>((resolve, reject) => {
@@ -127,7 +117,8 @@ export const storage = {
         req.onerror = () => reject(req.error);
       });
     } catch (e) {
-      console.warn(`IDB Write Failed (${key}):`, e);
+      console.error(`IDB Write Failed (${key}):`, e);
+      throw e; 
     }
   },
 
