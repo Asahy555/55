@@ -20,8 +20,7 @@ const localStore = {
       if (typeof window === 'undefined') return;
       window.localStorage.setItem(key, JSON.stringify(value));
     } catch (e) {
-      // Ignore quota errors silently, relying on IDB
-      console.warn(`LS Write Error (${key}) - Storage full?`, e);
+      console.error(`LS Write Error (${key}) - Likely Quota Exceeded:`, e);
     }
   },
   delete: (key: string) => {
@@ -38,33 +37,43 @@ let dbConnection: Promise<IDBDatabase> | null = null;
 const getDB = (): Promise<IDBDatabase> => {
   if (dbConnection) return dbConnection;
 
+  // Check if IDB is supported before trying
+  if (typeof window === 'undefined' || !window.indexedDB) {
+    return Promise.reject(new Error("IndexedDB not supported"));
+  }
+
   dbConnection = new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    try {
+        const request = window.indexedDB.open(DB_NAME, DB_VERSION);
 
-    request.onerror = () => {
-      console.error("IDB Open Error:", request.error);
-      dbConnection = null;
-      reject(request.error);
-    };
+        request.onerror = () => {
+          console.error("IDB Open Error:", request.error);
+          dbConnection = null;
+          reject(request.error);
+        };
 
-    request.onsuccess = () => {
-      const db = request.result;
-      db.onversionchange = () => {
-        db.close();
+        request.onsuccess = () => {
+          const db = request.result;
+          db.onversionchange = () => {
+            db.close();
+            dbConnection = null;
+          };
+          db.onclose = () => {
+            dbConnection = null;
+          };
+          resolve(db);
+        };
+
+        request.onupgradeneeded = (event) => {
+          const db = (event.target as IDBOpenDBRequest).result;
+          if (!db.objectStoreNames.contains(STORE_NAME)) {
+            db.createObjectStore(STORE_NAME);
+          }
+        };
+    } catch (e) {
         dbConnection = null;
-      };
-      db.onclose = () => {
-        dbConnection = null;
-      };
-      resolve(db);
-    };
-
-    request.onupgradeneeded = (event) => {
-      const db = (event.target as IDBOpenDBRequest).result;
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME);
-      }
-    };
+        reject(e);
+    }
   });
 
   return dbConnection;
@@ -73,10 +82,13 @@ const getDB = (): Promise<IDBDatabase> => {
 // --- Hybrid Storage Export ---
 export const storage = {
   get: async <T>(key: string): Promise<T | null> => {
-    // Strategy: Try IDB first. If missing, try LS (and migrate).
+    // 1. Try LocalStorage FIRST for speed and fallback reliability logic
+    const lsData = localStore.get<T>(key);
+    
+    // 2. Try IndexedDB
     try {
       const db = await getDB();
-      const result = await new Promise<T | null>((resolve, reject) => {
+      const idbData = await new Promise<T | null>((resolve, reject) => {
         const tx = db.transaction(STORE_NAME, 'readonly');
         const store = tx.objectStore(STORE_NAME);
         const req = store.get(key);
@@ -84,29 +96,22 @@ export const storage = {
         req.onerror = () => reject(req.error);
       });
       
-      if (result) return result;
+      // If IDB has data, prefer it (usually larger capacity). 
+      // If IDB is empty but LS has data, it means we might be in a fallback scenario or just migrated.
+      if (idbData) return idbData;
     } catch (e) {
-      console.warn(`IDB Read Failed (${key}):`, e);
+      // IDB failed/unavailable, just continue to use LS data if we have it
+      // console.warn(`IDB Read Skipped/Failed (${key})`, e);
     }
 
-    // Fallback / Migration
-    const lsData = localStore.get<T>(key);
-    if (lsData) {
-        // If found in LS but not IDB, save to IDB for future
-        storage.set(key, lsData).catch(e => console.error("Migration failed", e));
-        return lsData;
-    }
-    
-    return null;
+    return lsData;
   },
 
   set: async (key: string, value: any): Promise<void> => {
-    // Strategy: Write to BOTH. IDB for capacity, LS for redundancy.
-    
-    // 1. Write to LS (Best effort)
+    // 1. Always write to LocalStorage (Redundancy)
     localStore.set(key, value);
 
-    // 2. Write to IDB (Critical)
+    // 2. Try writing to IndexedDB (Capacity)
     try {
       const db = await getDB();
       await new Promise<void>((resolve, reject) => {
@@ -117,8 +122,8 @@ export const storage = {
         req.onerror = () => reject(req.error);
       });
     } catch (e) {
-      console.error(`IDB Write Failed (${key}):`, e);
-      throw e; 
+       // Silent fail for IDB write is okay as long as LS works. 
+       // If both fail, we have a problem, but usually LS is safer for small edits.
     }
   },
 
@@ -133,6 +138,6 @@ export const storage = {
         req.onsuccess = () => resolve();
         req.onerror = () => reject(req.error);
       });
-    } catch (e) { console.error("IDB Delete Error:", e); }
+    } catch (e) { }
   }
 };

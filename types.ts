@@ -19,6 +19,7 @@ export interface Message {
   videoUrl?: string;
   timestamp: number;
   isAction?: boolean; // If purely action
+  isLoading?: boolean; // Indicates loading state
 }
 
 export interface ChatSession {

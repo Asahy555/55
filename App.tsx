@@ -17,6 +17,45 @@ const generateId = () => {
   return Date.now().toString(36) + Math.random().toString(36).substr(2);
 };
 
+// Image compression utility
+const compressImage = (base64Str: string, maxWidth = 512, quality = 0.7): Promise<string> => {
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.src = base64Str;
+        img.crossOrigin = "anonymous";
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            let width = img.width;
+            let height = img.height;
+            
+            // Calculate new dimensions
+            if (width > maxWidth || height > maxWidth) {
+                if (width > height) {
+                    height = Math.round((height * maxWidth) / width);
+                    width = maxWidth;
+                } else {
+                    width = Math.round((width * maxWidth) / height);
+                    height = maxWidth;
+                }
+            }
+            
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+                ctx.drawImage(img, 0, 0, width, height);
+                resolve(canvas.toDataURL('image/jpeg', quality));
+            } else {
+                resolve(base64Str);
+            }
+        };
+        img.onerror = () => {
+            console.warn("Image compression failed, using original.");
+            resolve(base64Str);
+        };
+    });
+};
+
 // --- Icons ---
 const PlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>;
 const ChatIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2-2z"/></svg>;
@@ -45,15 +84,15 @@ const MessageBubble: React.FC<{
 }> = ({ msg, characters, onSaveToGallery }) => {
   const isUser = msg.senderId === 'user';
   const char = characters.find(c => c.id === msg.senderId);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [audioStatus, setAudioStatus] = useState<'idle' | 'generating' | 'playing'>('idle');
   
   const borderColor = isUser ? 'border-blue-500' : (char?.color || 'border-gray-500');
   const alignClass = isUser ? 'justify-end' : 'justify-start';
   const bgClass = isUser ? 'bg-blue-900/40' : 'bg-gray-800/80';
 
   const handlePlayVoice = async () => {
-    if (isPlaying || !char) return;
-    setIsPlaying(true);
+    if (audioStatus !== 'idle' || !char) return;
+    setAudioStatus('generating');
     try {
         const audioBuffer = await generateSpeech(msg.content, char.voice || 'Kore');
         if (audioBuffer) {
@@ -62,13 +101,14 @@ const MessageBubble: React.FC<{
             source.buffer = audioBuffer;
             source.connect(ctx.destination);
             source.start();
-            source.onended = () => setIsPlaying(false);
+            setAudioStatus('playing');
+            source.onended = () => setAudioStatus('idle');
         } else {
-            setIsPlaying(false);
+            setAudioStatus('idle');
         }
     } catch (e) {
         console.error("Playback failed", e);
-        setIsPlaying(false);
+        setAudioStatus('idle');
     }
   };
 
@@ -92,6 +132,9 @@ const MessageBubble: React.FC<{
     });
   };
 
+  // Determine if we should show a skeleton loader for media
+  const isMediaLoading = msg.isLoading && (msg.content.includes("Рисую") || msg.content.includes("Монтирую") || msg.content.includes("Генерирую"));
+
   return (
     <div className={`flex w-full mb-4 ${alignClass}`}>
       <div className={`max-w-[80%] md:max-w-[60%] flex flex-col ${isUser ? 'items-end' : 'items-start'}`}>
@@ -101,26 +144,57 @@ const MessageBubble: React.FC<{
              <span className="text-xs text-gray-400 font-bold" style={{ color: char.color }}>{char.name}</span>
           </div>
         )}
-        <div className={`relative px-4 py-3 rounded-2xl border-l-4 ${borderColor} ${bgClass} backdrop-blur-md shadow-lg`}>
-          <div className="text-sm md:text-base leading-relaxed break-words whitespace-pre-wrap text-gray-100 min-h-[24px]">
-            {renderContent(msg.content)}
-          </div>
+        <div className={`relative px-4 py-3 rounded-2xl border-l-4 ${borderColor} ${bgClass} backdrop-blur-md shadow-lg transition-all`}>
+          {isMediaLoading ? (
+             <div className="flex flex-col gap-2">
+                 <div className="w-64 h-64 bg-gray-800 rounded-lg animate-pulse flex flex-col items-center justify-center border border-gray-700">
+                    <div className="w-10 h-10 border-4 border-accent-500 border-t-transparent rounded-full animate-spin mb-3"></div>
+                    <span className="text-xs text-gray-400 font-medium animate-pulse">{msg.content}</span>
+                 </div>
+             </div>
+          ) : msg.isLoading ? (
+             <div className="flex items-center gap-3 min-w-[150px]">
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                <span className="text-sm font-medium text-gray-300 animate-pulse">{msg.content}</span>
+             </div>
+          ) : (
+            <div className="text-sm md:text-base leading-relaxed break-words whitespace-pre-wrap text-gray-100 min-h-[24px]">
+                {renderContent(msg.content)}
+            </div>
+          )}
           
           {/* Audio Button for AI */}
-          {!isUser && msg.content !== '...' && (
+          {!isUser && msg.content !== '...' && !msg.isLoading && !isMediaLoading && (
               <button 
                 onClick={handlePlayVoice} 
-                disabled={isPlaying}
-                className={`mt-2 flex items-center gap-1 text-xs px-2 py-1 rounded-full transition-colors ${isPlaying ? 'bg-accent-500/50 text-white' : 'bg-gray-700/50 text-gray-400 hover:bg-gray-600 hover:text-white'}`}
+                disabled={audioStatus !== 'idle'}
+                className={`mt-2 flex items-center gap-1 text-xs px-2 py-1 rounded-full transition-colors 
+                    ${audioStatus === 'playing' ? 'bg-accent-500 text-white animate-pulse' : 
+                      audioStatus === 'generating' ? 'bg-gray-700 text-gray-400 cursor-wait' :
+                      'bg-gray-700/50 text-gray-400 hover:bg-gray-600 hover:text-white'}`}
               >
-                  <SpeakerIcon />
-                  {isPlaying ? 'Говорит...' : 'Озвучить'}
+                  {audioStatus === 'generating' ? (
+                      <>
+                          <div className="w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+                          <span>Генерация звука...</span>
+                      </>
+                  ) : audioStatus === 'playing' ? (
+                      <>
+                          <SpeakerIcon />
+                          <span>Воспроизведение...</span>
+                      </>
+                  ) : (
+                      <>
+                          <SpeakerIcon />
+                          <span>Озвучить</span>
+                      </>
+                  )}
               </button>
           )}
 
           {/* Generated Image Container */}
           {msg.imageUrl && (
-            <div className="mt-3 rounded-lg overflow-hidden border border-gray-700 relative group">
+            <div className="mt-3 rounded-lg overflow-hidden border border-gray-700 relative group animate-fade-in">
               <img src={msg.imageUrl} alt="Generated content" className="w-full h-auto max-h-80 object-cover" />
               <div className="absolute top-2 right-2 flex gap-2 transition-opacity">
                   <button 
@@ -136,7 +210,7 @@ const MessageBubble: React.FC<{
           
           {/* Generated Video Container */}
           {msg.videoUrl && (
-             <div className="mt-3 rounded-lg overflow-hidden border border-gray-700 relative group">
+             <div className="mt-3 rounded-lg overflow-hidden border border-gray-700 relative group animate-fade-in">
                 <video src={msg.videoUrl} controls className="w-full h-auto max-h-80" />
                 <div className="absolute top-2 right-2 flex gap-2 transition-opacity z-10">
                    <button 
@@ -175,8 +249,11 @@ const CreateCharacter: React.FC<{ onSave: (c: Character) => void; onCancel: () =
         const file = e.target.files?.[0];
         if (file) {
             const reader = new FileReader();
-            reader.onloadend = () => {
-                setAvatar(reader.result as string);
+            reader.onloadend = async () => {
+                const base64 = reader.result as string;
+                // Compress before setting state to avoid storage quota issues later
+                const compressed = await compressImage(base64, 400); // 400px is enough for avatar
+                setAvatar(compressed);
             };
             reader.readAsDataURL(file);
         }
@@ -188,7 +265,9 @@ const CreateCharacter: React.FC<{ onSave: (c: Character) => void; onCancel: () =
       try {
         const prompt = avatarPrompt || `Portrait of ${name}, ${description}`;
         const url = await generateImage(prompt);
-        setAvatar(url);
+        // Gemini returns optimize base64, but let's ensure it's small enough
+        const compressed = await compressImage(url, 400);
+        setAvatar(compressed);
       } catch (e) {
         console.error(e);
         alert("Failed to generate avatar");
@@ -321,6 +400,16 @@ const CreateCharacter: React.FC<{ onSave: (c: Character) => void; onCancel: () =
 };
   
 const GalleryPage: React.FC<{ items: GalleryItem[]; onDelete: (id: string) => void; onBack: () => void }> = ({ items, onDelete, onBack }) => {
+    
+    const handleDownload = (item: GalleryItem) => {
+        const link = document.createElement('a');
+        link.href = item.url;
+        link.download = `soulkyn_${item.type}_${Date.now()}.${item.type === 'video' ? 'mp4' : 'png'}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     return (
         <div className="max-w-6xl mx-auto p-6 animate-fade-in min-h-screen">
             <header className="flex items-center gap-4 mb-8">
@@ -343,10 +432,18 @@ const GalleryPage: React.FC<{ items: GalleryItem[]; onDelete: (id: string) => vo
                                 ) : (
                                     <img src={item.url} alt={item.caption} className="w-full h-full object-cover" />
                                 )}
-                                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+                                    <button 
+                                        onClick={() => handleDownload(item)}
+                                        className="bg-gray-900/80 text-white p-1.5 rounded-full hover:bg-accent-500 backdrop-blur"
+                                        title="Скачать"
+                                    >
+                                        <DownloadIcon />
+                                    </button>
                                     <button 
                                         onClick={() => onDelete(item.id)}
                                         className="bg-red-500/80 text-white p-1.5 rounded-full hover:bg-red-600 backdrop-blur"
+                                        title="Удалить"
                                     >
                                         <TrashIcon />
                                     </button>
@@ -566,10 +663,11 @@ const App = () => {
         if (loadedChats) setChats(loadedChats);
         if (loadedGallery) setGallery(loadedGallery);
         
-        setIsDataLoaded(true); 
       } catch (e) {
         console.error("Critical storage error:", e);
-        setGlobalError("Critical: Failed to load data. Please refresh.");
+        setGlobalError("Failed to load data. Your browser storage might be full or restricted.");
+      } finally {
+        setIsDataLoaded(true); 
       }
     };
     loadData();
@@ -683,6 +781,14 @@ const App = () => {
           caption,
           timestamp: Date.now()
       };
+      
+      // If it's a data URL, try to compress it if it's an image
+      if (type === 'image' || type === 'background') {
+          if (newItem.url.startsWith('data:image')) {
+              newItem.url = await compressImage(newItem.url, 800); // 800px max for gallery
+          }
+      }
+
       const newGallery = [newItem, ...gallery];
       setGallery(newGallery);
       try {
@@ -715,13 +821,26 @@ const App = () => {
           id: tempId,
           senderId: activeChar.id,
           senderName: activeChar.name,
-          content: type === 'photo' ? "📸 Генерирую фото..." : "📹 Генерирую видео...",
-          timestamp: Date.now()
+          content: "⏳ Анализирую контекст...",
+          timestamp: Date.now(),
+          isLoading: true
       };
 
       const newChats = [...chats];
       newChats[chatIndex] = { ...session, messages: [...session.messages, placeholder] };
       setChats(newChats);
+
+      const updateLoadingMessage = (text: string) => {
+          setChats(prev => {
+              const uChats = [...prev];
+              const idx = uChats.findIndex(c => c.id === activeChatId);
+              if (idx === -1) return prev;
+              const uChat = { ...uChats[idx] };
+              uChat.messages = uChat.messages.map(m => m.id === tempId ? { ...m, content: text } : m);
+              uChats[idx] = uChat;
+              return uChats;
+          });
+      };
 
       try {
           const activeCharacters = characters.filter(c => session.participants.includes(c.id));
@@ -729,6 +848,8 @@ const App = () => {
               session.messages.map(m => ({ sender: m.senderName, text: m.content })),
               activeCharacters.map(c => c.description)
           );
+          
+          updateLoadingMessage(type === 'photo' ? "🎨 Рисую сцену (Генерирую)..." : "🎬 Монтирую видео (Генерирую)...");
           
           let mediaUrl = "";
           if (type === 'photo') {
@@ -738,6 +859,11 @@ const App = () => {
           }
 
           if (mediaUrl) {
+               // Compress if image
+               if (type === 'photo' && mediaUrl.startsWith('data:image')) {
+                   mediaUrl = await compressImage(mediaUrl, 800);
+               }
+
                const successMsg: Message = {
                    id: tempId,
                    senderId: activeChar.id,
@@ -745,27 +871,38 @@ const App = () => {
                    content: type === 'photo' ? "Фото с места событий:" : "Видеофрагмент:",
                    imageUrl: type === 'photo' ? mediaUrl : undefined,
                    videoUrl: type === 'video' ? mediaUrl : undefined,
-                   timestamp: Date.now()
+                   timestamp: Date.now(),
+                   isLoading: false
                };
-               const updatedChats = [...chats];
-               const currentChat = updatedChats.find(c => c.id === activeChatId);
-               if (currentChat) {
-                   currentChat.messages = currentChat.messages.map(m => m.id === tempId ? successMsg : m);
-                   setChats(updatedChats);
-                   await triggerSave('ai_rpg_chats', updatedChats);
-               }
+               setChats(prev => {
+                   const uChats = [...prev];
+                   const idx = uChats.findIndex(c => c.id === activeChatId);
+                   if (idx !== -1) {
+                        const uChat = { ...uChats[idx] };
+                        uChat.messages = uChat.messages.map(m => m.id === tempId ? successMsg : m);
+                        uChats[idx] = uChat;
+                        triggerSave('ai_rpg_chats', uChats);
+                        return uChats;
+                   }
+                   return prev;
+               });
           } else {
                throw new Error("Empty media URL");
           }
       } catch (e) {
           console.error(e);
           setGlobalError("Ошибка генерации медиа");
-           const updatedChats = [...chats];
-           const currentChat = updatedChats.find(c => c.id === activeChatId);
-           if (currentChat) {
-               currentChat.messages = currentChat.messages.filter(m => m.id !== tempId);
-               setChats(updatedChats);
-           }
+           setChats(prev => {
+                const uChats = [...prev];
+                const idx = uChats.findIndex(c => c.id === activeChatId);
+                if (idx !== -1) {
+                    const uChat = { ...uChats[idx] };
+                    uChat.messages = uChat.messages.filter(m => m.id !== tempId);
+                    uChats[idx] = uChat;
+                    return uChats;
+                }
+                return prev;
+           });
       }
   };
 
@@ -853,6 +990,9 @@ const App = () => {
                      const prompt = imgMatch[1];
                      finalText = finalText.replace(imgMatch[0], '').trim();
                      finalImageUrl = await generateImage(prompt, [char.avatar]);
+                     if (finalImageUrl.startsWith('data:image')) {
+                        finalImageUrl = await compressImage(finalImageUrl, 800);
+                     }
                  }
                  
                  if (msgIndex !== -1) {
