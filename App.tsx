@@ -583,7 +583,8 @@ const ChatInterface = ({
     onSaveToGallery, 
     setGlobalError, 
     sendMessageToAI,
-    onGenerateMedia
+    onGenerateMedia,
+    onDeleteSession
   }: { 
     session: ChatSession, 
     characters: Character[], 
@@ -594,7 +595,8 @@ const ChatInterface = ({
     onSaveToGallery: (url: string, type: 'image' | 'video' | 'background', caption: string) => void,
     setGlobalError: (msg: string | null) => void,
     sendMessageToAI: (text: string, image?: string) => void,
-    onGenerateMedia: (type: 'photo' | 'video') => void
+    onGenerateMedia: (type: 'photo' | 'video') => void,
+    onDeleteSession: () => void
   }) => {
     const [input, setInput] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
@@ -612,10 +614,8 @@ const ChatInterface = ({
     const scrollToBottom = () => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); };
     useEffect(() => { scrollToBottom(); }, [session.messages]);
   
-    const handleClearHistory = () => {
-      if (window.confirm("Вы уверены, что хотите очистить историю чата? Это действие необратимо.")) {
-          onUpdateSession({ ...session, messages: [] });
-      }
+    const handleDeleteChat = () => {
+        onDeleteSession();
     };
   
     const toggleNSFW = () => { onUpdateSession({ ...session, isNSFW: !session.isNSFW }); };
@@ -710,7 +710,7 @@ const ChatInterface = ({
                   {session.isNSFW ? 'NSFW' : 'SFW'}
                </button>
               <Button variant="ghost" className="!p-2 text-gray-400 hover:text-white" onClick={() => onOpenDirectChat(session.participants[0])}><ChatIcon /></Button>
-              <Button variant="ghost" className="!p-2 text-red-400 hover:text-red-300" onClick={handleClearHistory}><TrashIcon /></Button>
+              <Button variant="ghost" className="!p-2 text-red-400 hover:text-red-300" onClick={handleDeleteChat} title="Удалить чат"><TrashIcon /></Button>
           </div>
         </div>
   
@@ -798,11 +798,10 @@ const App = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [loadedChars, loadedChats, loadedGallery] = await Promise.all([
-          storage.get<Character[]>('ai_rpg_chars'),
-          storage.get<ChatSession[]>('ai_rpg_chats'),
-          storage.get<GalleryItem[]>('ai_rpg_gallery')
-        ]);
+        // Sequentially load to prevent IDB race conditions during mounting
+        const loadedChars = await storage.get<Character[]>('ai_rpg_chars');
+        const loadedChats = await storage.get<ChatSession[]>('ai_rpg_chats');
+        const loadedGallery = await storage.get<GalleryItem[]>('ai_rpg_gallery');
 
         if (loadedChars) setCharacters(loadedChars);
         if (loadedChats) setChats(loadedChats);
@@ -1239,8 +1238,11 @@ const App = () => {
           <div className="max-w-6xl mx-auto p-6 animate-fade-in pb-24 h-screen overflow-y-auto custom-scrollbar">
               <header className="flex flex-col md:flex-row justify-between items-center mb-10 gap-4 mt-6">
                   <div>
-                      <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-accent-500 to-purple-500 mb-2">Soulkyn AI</h1>
-                      <div className="flex items-center gap-3"><p className="text-gray-400">Ролевой ИИ чат</p></div>
+                      <h1 className="text-4xl font-black text-white mb-2 flex items-baseline select-none">
+                          <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent-500 to-purple-500">S</span>
+                          <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent-500 to-purple-500">x</span>
+                          <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent-500 to-purple-500 ml-2">AI</span>
+                      </h1>
                   </div>
                   <div className="flex gap-3">
                     <Button onClick={() => setPage(Page.GALLERY)} variant="secondary"><GalleryIcon /> Галерея</Button>
@@ -1323,7 +1325,7 @@ const App = () => {
                                           {new Date(chat.lastUpdated).toLocaleDateString()} {new Date(chat.lastUpdated).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                                       </p>
                                   </div>
-                                  <button onClick={(e) => deleteChat(e, chat.id)} className="p-2 text-gray-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"><TrashIcon /></button>
+                                  <button onClick={(e) => deleteChat(e, chat.id)} className="p-2 text-gray-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity relative z-10"><TrashIcon /></button>
                               </div>
                           ))}
                       </div>
@@ -1363,6 +1365,15 @@ const App = () => {
                   setGlobalError={setGlobalError}
                   sendMessageToAI={sendMessage}
                   onGenerateMedia={handleGenerateMedia}
+                  onDeleteSession={() => {
+                      if(window.confirm("Удалить этот чат?")) {
+                          const newChats = chats.filter(c => c.id !== activeChatId);
+                          setChats(newChats);
+                          setActiveChatId(null);
+                          setPage(Page.HOME);
+                          triggerSave('ai_rpg_chats', newChats);
+                      }
+                  }}
               />
           </div>
       )}
