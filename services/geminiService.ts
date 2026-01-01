@@ -1,10 +1,11 @@
 
 import { GoogleGenAI, HarmCategory, HarmBlockThreshold, Modality } from "@google/genai";
 
+const API_KEY = 'AIzaSyDL1s778MUp-0aFO_n19lzOk7xcRlzS8GQ';
+
 const getClient = () => {
-  const apiKey = process.env.API_KEY;
-  if (!apiKey) throw new Error("API Key not found");
-  return new GoogleGenAI({ apiKey });
+  if (!API_KEY) throw new Error("API Key not found");
+  return new GoogleGenAI({ apiKey: API_KEY });
 };
 
 const SAFETY_SETTINGS = [
@@ -261,7 +262,7 @@ export const generateVideo = async (prompt: string): Promise<string> => {
     if (!downloadLink) throw new Error("No video URI returned");
 
     // Fetch the actual video bytes using the key
-    const response = await fetch(`${downloadLink}&key=${process.env.API_KEY}`);
+    const response = await fetch(`${downloadLink}&key=${API_KEY}`);
     const blob = await response.blob();
     
     // Create a local object URL for playback
